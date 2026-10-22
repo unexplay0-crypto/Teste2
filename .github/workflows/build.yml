@@ -256,10 +256,7 @@ jobs:
               # 1. Ativa fallback automatico de Decoder no ExoPlayer quando o MediaCodec primario (index=0) da TV falha
               if "import androidx.media3.exoplayer.ExoPlayer;" in content and "new ExoPlayer.Builder(context)" in content:
                   replacement = (
-                      "new ExoPlayer.Builder(context)"
-                      ".setLoadControl(new androidx.media3.exoplayer.DefaultLoadControl.Builder()"
-                      ".setBufferDurationsMs(15000, 60000, 1500, 5000).build())"
-                      ".setRenderersFactory("
+                      "new ExoPlayer.Builder(context).setRenderersFactory("
                       "new androidx.media3.exoplayer.DefaultRenderersFactory(context)"
                       ".setEnableDecoderFallback(true))"
                   )
