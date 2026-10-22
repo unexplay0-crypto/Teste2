@@ -12,6 +12,7 @@ import 'mobile_screen.dart';
 import 'player_screen.dart';
 import 'ativacao_screen.dart';
 import 'tmdb_banners.dart';
+import 'home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -189,6 +190,7 @@ class _UnexRootControllerState extends State<UnexRootController> {
   Map<String, double> _watchProgress = {};
   bool _isAdultUnlocked = false;
   List<Suggestion> _suggestions = [];
+  bool _showHome = true; // abre direto na Tela Inicial
 
   @override
   void initState() {
@@ -1091,6 +1093,46 @@ class _UnexRootControllerState extends State<UnexRootController> {
         );
       }
       return _buildLoginScreen();
+    }
+
+    if (_showHome) {
+      return HomeDashboard(
+        suggestions: _suggestions,
+        liveChannels: _allItems.where((i) => i.type == ContentType.live).take(12).toList(),
+        featuredMovies: _allItems.where((i) => i.type == ContentType.movie).take(12).toList(),
+        deviceMode: _deviceMode,
+        searchController: _searchController,
+        onSearchChanged: (v) => setState(() => _searchQuery = v),
+        onSelectBanner: (s) {
+          final item = StreamItem(
+            id: 'sug_${s.tmdb.id}',
+            name: s.streamName,
+            url: s.streamUrl,
+            logo: s.tmdb.posterUrl,
+            group: 'Sugestões',
+            type: ContentType.movie,
+            qualityTag: 'HD',
+            isAdult: false,
+          );
+          _openFullScreen(item, [item]);
+        },
+        onOpenChannel: (c) {
+          setState(() {
+            _showHome = false;
+            _activeSection = 0;
+            _selectedLiveChannel = c;
+          });
+          SharedStreamEngine.instance.openStream(c);
+        },
+        onOpenMovie: _openMovieDetails,
+        onSeeAllChannels: () => setState(() { _showHome = false; _activeSection = 0; }),
+        onSeeAllMovies: () => setState(() { _showHome = false; _activeSection = 1; }),
+        onGoToLive: () => setState(() { _showHome = false; _activeSection = 0; }),
+        onGoToMovies: () => setState(() { _showHome = false; _activeSection = 1; }),
+        onGoToSeries: () => setState(() { _showHome = false; _activeSection = 2; }),
+        onGoToFavorites: () => setState(() { _showHome = false; _activeSection = 3; }),
+        onGoToSettings: _switchAccount,
+      );
     }
 
     if (_deviceMode == DeviceMode.mobile) {
